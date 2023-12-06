@@ -7,7 +7,7 @@ const app = fastify();
 app.register(userRoutes);
 app.register(recipeRoutes);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 7600;
 
 app.listen(PORT, (err) => {
   if (err) {

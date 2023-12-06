@@ -76,8 +76,6 @@ async function loginUser(req, reply) {
       reply.code(401).send({ error: 'Credenciais inválidas.' });
       return;
     }
-
-    // Se as credenciais estiverem corretas, gerar um token JWT
     const token = generateToken(user.id);
 
     reply.send({ user, token });
@@ -86,6 +84,28 @@ async function loginUser(req, reply) {
     reply.code(500).send({ error: 'Erro ao fazer login.' });
   }
 }
+
+async function getUserInfo(req, reply) {
+  try {
+    const userId = await getUserFromToken(req);
+
+    const userInfo = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, username: true, createdAt: true },
+    });
+
+    if (!userInfo) {
+      reply.code(404).send({ error: 'Usuário não encontrado.' });
+      return;
+    }
+
+    reply.send(userInfo);
+  } catch (error) {
+    console.error(error);
+    reply.code(500).send({ error: 'Erro ao obter informações do usuário.' });
+  }
+}
+
 
 async function editUser(req, reply) {
   const { username, password } = req.body;
@@ -117,5 +137,6 @@ export default function (fastify, opts, next) {
   fastify.post('/users', createUser);
   fastify.post('/login', loginUser); 
   fastify.put('/users', editUser);
+  fastify.get('/user-info', getUserInfo);
   next();
 }

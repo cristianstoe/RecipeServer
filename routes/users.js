@@ -84,14 +84,13 @@ async function loginUser(req, reply) {
     reply.code(500).send({ error: 'Erro ao fazer login.' });
   }
 }
-
 async function getUserInfo(req, reply) {
   try {
-    const userId = await getUserFromToken(req);
+    const {id} = await getUserFromToken(req);
+    // console.log(userId);
 
     const userInfo = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, email: true, username: true, createdAt: true },
+      where: { id: id }, 
     });
 
     if (!userInfo) {
@@ -99,7 +98,7 @@ async function getUserInfo(req, reply) {
       return;
     }
 
-    reply.send(userInfo);
+    reply.send({ userInfo });
   } catch (error) {
     console.error(error);
     reply.code(500).send({ error: 'Erro ao obter informações do usuário.' });
